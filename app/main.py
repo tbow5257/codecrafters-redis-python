@@ -1,5 +1,13 @@
 # Uncomment this to pass the first stage
 import socket
+import re
+
+def extract_words(s):
+    matches = re.findall(r"\$\d+\r\n(.+?)\r\n", s)
+    return matches
+
+def is_ping(word):
+    return word == b'PING'
 
 
 def main():
@@ -13,12 +21,34 @@ def main():
 
     data = b""
 
-    while b"\r\n" not in data:
+    is_RESP_array = False
+    array_size = None
+    last_counted_amount_of_words = 0
+
+
+    while True:
+        if is_RESP_array:
+            current_list_of_words = extract_words(data)
+            if len(current_list_of_words) > last_counted_amount_of_words:
+                for word in current_list_of_words[last_counted_amount_of_words:]:
+                    if is_ping(word):
+                        conn.send(b"+PONG\r\n")
+                    
+            last_counted_amount_of_words = len(current_list_of_words)
+
+
+        if b"*" in data and not is_RESP_array:
+            is_RESP_array = True
+
+        if is_RESP_array and not array_size and data.index("*") < len(data) - 1:
+            array_size = data[data.index("*") + 1]
+
+        
         chunk = conn.recv(256)
         print("chunk ", chunk)
         data += chunk
 
-    conn.send(b"+PONG\r\n")
+    
 
 
 
