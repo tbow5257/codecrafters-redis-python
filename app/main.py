@@ -7,7 +7,7 @@ def extract_words(s):
     return matches
 
 def is_ping(word):
-    return word == b'PING'
+    return word == b'ping'
 
 
 def main():
