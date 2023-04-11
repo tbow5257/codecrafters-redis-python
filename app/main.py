@@ -40,8 +40,8 @@ def main():
         if b"*" in data and not is_RESP_array:
             is_RESP_array = True
 
-        if is_RESP_array and not array_size and data.index("*") < len(data) - 1:
-            array_size = data[data.index("*") + 1]
+        if is_RESP_array and not array_size and data.index(b"*") < len(data) - 1:
+            array_size = data[data.index(b"*") + 1]
 
         
         chunk = conn.recv(256)
