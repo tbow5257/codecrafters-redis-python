@@ -13,6 +13,7 @@ def main():
 
     while b"\r\n" not in data:
         chunk = conn.recv(256)
+        print("chunk ", chunk)
         data += chunk
 
     conn.send(b"+PONG\r\n")
