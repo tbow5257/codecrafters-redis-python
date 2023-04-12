@@ -11,7 +11,7 @@ def is_ping(word):
     return word == b'ping'
 
 def is_RESP_array(data):
-    return data is not None and "*" in data
+    return b"*" in data
 
 
 def main():
@@ -23,20 +23,12 @@ def main():
     server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
     conn, _ = server_socket.accept() # wait for client
 
-    data = None
-
-    array_size = None
-    last_counted_amount_of_words = 0
-
+    data = b""
 
     while True:
         print("top of true ", is_RESP_array(data))
 
-        if data is not None and len(data) == 0:
-            data = None
-            continue
-
-        if data is not None and is_RESP_array(data):
+        if is_RESP_array(data):
             print('enterrr')
             current_list_of_words = extract_words(data)
 
@@ -45,7 +37,7 @@ def main():
                 if is_ping(word):
                     conn.send(b"+PONG\r\n")
             
-            data = None
+            data = b""
 
         # if is_RESP_array and not array_size and data.index(b"*") < len(data) - 1:
         #     array_size = data[data.index(b"*") + 1]
