@@ -11,7 +11,7 @@ def is_ping(word):
     return word == b'ping'
 
 def is_RESP_array(data):
-    return b"*" in data
+    return data is not None and "*" in data
 
 
 def main():
