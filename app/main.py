@@ -14,18 +14,37 @@ def is_ping(word):
 def is_RESP_array(data):
     return b"*" in data
 
-async def handle_redis_array(data: bytes, writer: asyncio.StreamWriter):
+def handle_redis_array(data: bytes):
+    print('enter handle redis array')
     messages = extract_redis_messages(data)
+    responses = []
     for message in messages:
         if is_ping(message):
-            writer.write(b"+PONG\r\n")
+            responses.append(b"+PONG\r\n")
+    return responses
 
 async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
-    data = await reader.read(256)
+    try:
+        while True:  # keep the connection open
+            data = await reader.read(256)
 
-    await asyncio.to_thread(handle_redis_array(data, writer))
+            if not data:  # if no data, client has disconnected
+                break
 
-    await writer.drain()
+            print(data)
+
+            responses = await asyncio.to_thread(handle_redis_array, data)
+
+            print('responses', responses)
+            for response in responses:
+                writer.write(response)
+
+            await writer.drain()
+    except Exception as e:
+        print(f'Error in handling client: {e}')
+    finally:
+        writer.close()
+        await writer.wait_closed()
 
 async def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
